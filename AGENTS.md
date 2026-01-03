@@ -1,7 +1,12 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-The repository is currently lightweight: `README.md`, `LICENSE`, `.gitignore`, and `pyproject.toml` (UV project config). There is no application code or tests yet. When you add code, keep Python packages under `src/` (e.g., `src/video_agent/`), tests under `tests/` (e.g., `tests/test_validation.py`), and any static artifacts or sample media under `assets/` or `data/` with a short provenance note.
+The repo centers on the analysis agent script `analysis_agent.py`. Hercules artifacts live under `opt/`:
+- `opt/log_files/` for planner logs
+- `opt/proofs/` for videos and screenshots
+- `opt/output/` for JUnit XML and generated deviation reports
+
+If you expand the codebase, keep Python packages under `src/` (e.g., `src/video_agent/`), tests under `tests/` (e.g., `tests/test_validation.py`), and any static artifacts or sample media under `assets/` or `data/` with a short provenance note.
 
 ## Build, Test, and Development Commands
 Dependency management uses UV via `pyproject.toml`. Common workflows:

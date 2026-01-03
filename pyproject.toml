@@ -1,7 +1,7 @@
 [project]
 name = "video-analysis-and-validation-agent"
 version = "0.1.0"
-description = "Video analysis and validation agent."
+description = "Analysis agent for Hercules test run validation. Compares planning logs, video evidence, and test output to detect deviations."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = []

@@ -1,0 +1,76 @@
+{
+    "user_proxy_agent": [
+        {
+            "content": "Execute the USER TESTING TASK INSTRUCTIONS: \"Feature: Search and add XL size shirt to cart on Wrangler website ;next;  As a customer on wrangler.in ;next;  I want to search for a solid blue shirt in XL size ;next;  So that I can add it to my cart and purchase it ;next;  @product_search @cart @xl_size ;next; Scenario:Search for solid blue shirt, verify XL size availability, add to cart and verifySearch for solid blue shirt, verify XL size availability, add to cart and verify ;next;  Given a user is on the URL as https://www.wrangler.in ;next;  When the user clicks on the Search icon ;next;  And the user enters \"solid blue shirt\" in the search bar ;next;  And the user presses Enter to search ;next;  Then search results should be displayed ;next;  When the user clicks on the first matching product from the search results ;next;  Then the Product Detail Page (PDP) should be displayed ;next;  When the user checks for XL size availability on the PDP ;next;  Then the XL size option should be available and selectable ;next;  When the user selects the XL size ;next;  And the user clicks on the Add to Cart button ;next;  Then the product should be added to the cart successfully ;next;  When the user navigates to the cart ;next;  Then the cart should display the following: ;next;  | Field | Expected Value | ;next;  | Product Name | matches searched product | ;next;  | Size | XL | ;next;  | Quantity | 1 |\" \nCURRENT STATE:",
+            "role": "assistant",
+            "name": "user"
+        },
+        {
+            "content": {
+                "plan": "1. Navigate to https://www.wrangler.in and verify the homepage loads successfully.\n2. Click on the Search icon and verify the search input field becomes visible.\n3. Enter \"solid blue shirt\" into the search bar and press Enter, then verify that search results are displayed.\n4. Click on the first matching product from the search results and verify that the Product Detail Page (PDP) is displayed.\n5. Check for XL size availability on the PDP and verify that the XL size option is present and selectable.\n6. Select the XL size option.\n7. Click the Add to Cart button and verify that the product is added to the cart successfully (e.g., confirmation toast appears).\n8. Navigate to the cart page and verify that the cart page loads.\n9. Validate the cart contents: the product name matches the searched product, the size is XL, and the quantity is 1.",
+                "next_step": "Navigate the browser to https://www.wrangler.in and confirm that the homepage has loaded by checking that the page title contains \"Wrangler\" or that the main homepage banner is visible. MANDATORY: Report success only after this verification is confirmed.",
+                "terminate": "no",
+                "final_response": "",
+                "is_assert": false,
+                "assert_summary": "",
+                "is_passed": false,
+                "target_helper": "browser"
+            },
+            "role": "user",
+            "name": "planner_agent"
+        },
+        {
+            "content": "TASK FOR HELPER: Navigate the browser to https://www.wrangler.in and confirm that the homepage has loaded by checking that the page title contains \"Wrangler\" or that the main homepage banner is visible. MANDATORY: Report success only after this verification is confirmed. Current Page: about:blank, Title:  ##target_helper: browser##",
+            "role": "assistant",
+            "name": "user"
+        },
+        {
+            "content": "previous_step: Navigated to Wrangler website\ncurrent_output: Successfully loaded Wrangler homepage. Verification confirmed via page title containing \"WRANGLER\".\nData: {\"page_url\": \"https://www.wrangler.in/\", \"page_title\": \"WRANGLER India Official Web Store | Jeans, T-Shirts and Shirts for Men and Women\"}\n\n Current Page: https://www.wrangler.in/, Title: WRANGLER India Official Web Store | Jeans, T-Shirts and Shirts for Men and Women",
+            "role": "assistant",
+            "name": "user"
+        },
+        {
+            "content": {
+                "plan": "1. Navigate to https://www.wrangler.in and verify the homepage loads successfully.\n2. Click on the Search icon and verify the search input field becomes visible.\n3. Enter \"solid blue shirt\" into the search bar and press Enter, then verify that search results are displayed.\n4. Click on the first matching product from the search results and verify that the Product Detail Page (PDP) is displayed.\n5. Check for XL size availability on the PDP and verify that the XL size option is present and selectable.\n6. Select the XL size option.\n7. Click the Add to Cart button and verify that the product is added to the cart successfully (e.g., confirmation toast appears).\n8. Navigate to the cart page and verify that the cart page loads.\n9. Validate the cart contents: the product name matches the searched product, the size is XL, and the quantity is 1.",
+                "next_step": "In the browser, locate and click the Search icon (typically a magnifying glass) on the Wrangler homepage. After clicking, verify that the search input field becomes visible and is ready for text entry. MANDATORY: Confirm visibility of the input field before proceeding.",
+                "terminate": "no",
+                "final_response": "",
+                "is_assert": false,
+                "assert_summary": "",
+                "is_passed": false,
+                "target_helper": "browser"
+            },
+            "role": "user",
+            "name": "planner_agent"
+        },
+        {
+            "content": "TASK FOR HELPER: In the browser, locate and click the Search icon (typically a magnifying glass) on the Wrangler homepage. After clicking, verify that the search input field becomes visible and is ready for text entry. MANDATORY: Confirm visibility of the input field before proceeding. Current Page: https://www.wrangler.in/, Title: WRANGLER India Official Web Store | Jeans, T-Shirts and Shirts for Men and Women ##target_helper: browser##",
+            "role": "assistant",
+            "name": "user"
+        },
+        {
+            "content": "previous_step: Clicked the Search icon (md=1613) successfully\ncurrent_output: Verified search input field is visible with md=1673 and name \"Start typing to search\"\nData: {\"input_field_md\": \"1673\", \"input_field_label\": \"Start typing to search\", \"is_visible\": true}\n\n Current Page: https://www.wrangler.in/, Title: WRANGLER India Official Web Store | Jeans, T-Shirts and Shirts for Men and Women",
+            "role": "assistant",
+            "name": "user"
+        },
+        {
+            "content": {
+                "plan": "1. Navigate to https://www.wrangler.in and verify the homepage loads successfully.\n2. Click on the Search icon and verify the search input field becomes visible.\n3. Enter \"solid blue shirt\" into the search bar and press Enter, then verify that search results are displayed.\n4. Click on the first matching product from the search results and verify that the Product Detail Page (PDP) is displayed.\n5. Check for XL size availability on the PDP and verify that the XL size option is present and selectable.\n6. Select the XL size option.\n7. Click the Add to Cart button and verify that the product is added to the cart successfully (e.g., confirmation toast appears).\n8. Navigate to the cart page and verify that the cart page loads.\n9. Validate the cart contents: the product name matches the searched product, the size is XL, and the quantity is 1.",
+                "next_step": "In the browser, type the text \"solid blue shirt\" into the visible search input field (md=1673) and simulate pressing the Enter key. After submission, verify that a list of search results appears (e.g., result container becomes visible or at least one product tile is displayed). MANDATORY: Confirm presence of search results before proceeding.",
+                "terminate": "no",
+                "final_response": "",
+                "is_assert": false,
+                "assert_summary": "",
+                "is_passed": false,
+                "target_helper": "browser"
+            },
+            "role": "user",
+            "name": "planner_agent"
+        },
+        {
+            "content": "TASK FOR HELPER: In the browser, type the text \"solid blue shirt\" into the visible search input field (md=1673) and simulate pressing the Enter key. After submission, verify that a list of search results appears (e.g., result container becomes visible or at least one product tile is displayed). MANDATORY: Confirm presence of search results before proceeding. Current Page: https://www.wrangler.in/, Title: WRANGLER India Official Web Store | Jeans, T-Shirts and Shirts for Men and Women ##target_helper: browser##",
+            "role": "assistant",
+            "name": "user"
+        }
+    ]
+}
