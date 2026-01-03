@@ -207,3 +207,6 @@ marimo/_lsp/
 __marimo__/
 
 *.DS_Store
+
+Video_analysis_and_validation_agent/agents_llm_config.json
+agents_llm_config.json
