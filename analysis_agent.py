@@ -265,12 +265,19 @@ class VideoAnalyzer:
 
         try:
             # Get video duration
-            result = subprocess.run(
-                ["ffprobe", "-v", "error", "-show_entries", "format=duration",
-                 "-of", "default=noprint_wrappers=1:nokey=1", str(video_path)],
-                capture_output=True, text=True
-            )
-            duration = float(result.stdout.strip()) if result.stdout.strip() else 60.0
+            try:
+                result = subprocess.run(
+                    ["ffprobe", "-v", "error", "-show_entries", "format=duration",
+                     "-of", "default=noprint_wrappers=1:nokey=1", str(video_path)],
+                    capture_output=True, text=True
+                )
+                duration_str = result.stdout.strip()
+                if duration_str and duration_str != "N/A":
+                    duration = float(duration_str)
+                else:
+                    duration = 60.0
+            except ValueError:
+                duration = 60.0
 
             # Extract frames
             subprocess.run(
@@ -512,32 +519,61 @@ class AnalysisAgent:
                     "path": ss.path
                 })
 
-        # Sort by timestamp
-        action_times.sort(key=lambda x: x["timestamp"])
-
-        # Assign time windows to steps based on action sequence
-        if action_times:
-            base_time = action_times[0]["timestamp"]
-            for at in action_times:
-                at["relative"] = at["timestamp"] - base_time
-
-            # Map actions to steps (simplified heuristic)
-            action_idx = 0
-            for step in steps:
-                # Find matching action
-                while action_idx < len(action_times):
-                    at = action_times[action_idx]
-                    if step.action.lower() in at["action"].lower() or \
-                       at["action"].lower() in step.action.lower():
-                        step.timestamp_start = at["relative"]
-                        # Find end timestamp
-                        if action_idx + 1 < len(action_times):
-                            step.timestamp_end = action_times[action_idx + 1]["relative"]
+        # Try to use log files for timestamps if screenshots are insufficient
+        log_files = artifacts.get("log_files", [])
+        log_timestamps = []
+        import datetime
+        
+        for log_file in log_files:
+            # Filename format: log_between_sender-user-rec-chat_manager_YYYY-MM-DDTHH-MM-SS-mmmmm.json
+            name = log_file.name
+            if "log_between" in name and "chat_manager" in name:
+                try:
+                    # Extract timestamp part
+                    ts_part = name.split("_")[-1].replace(".json", "")
+                    # Parse simplified ISO format in filename
+                    # 2026-01-04T19-13-06-569774 -> %Y-%m-%dT%H-%M-%S-%f
+                    dt = datetime.datetime.strptime(ts_part, "%Y-%m-%dT%H-%M-%S-%f")
+                    log_timestamps.append(dt.timestamp())
+                except ValueError:
+                    pass
+        
+        log_timestamps.sort()
+        
+        # If we have log timestamps, use them to approximate step starts
+        if log_timestamps and len(log_timestamps) > 0:
+            start_time_base = log_timestamps[0]
+            
+            # If we already have screenshot timestamps, align baselines
+            video_start_offset = 0.0
+            if action_times:
+                # Assuming first screenshot generally happens shortly after first log
+                # We can try to normalize. But simpler is to rely on relative times.
+                pass
+            
+            # Assign windows based on log sequence (1 log file per interaction/step usually)
+            # This is a heuristic: each log file corresponds to a step initiation
+            
+            # Map log timestamps to relative time from start
+            relative_logs = [t - start_time_base for t in log_timestamps]
+            
+            # If we didn't get enough info from screenshots, overlay log info
+            steps_with_time = [s for s in steps if s.timestamp_start > 0]
+            if len(steps_with_time) < len(steps) * 0.5: # If < 50% steps have time from screenshots
+                print(f"Using log timestamps for alignment (found {len(relative_logs)} logs)")
+                
+                # Ideally map 1 log -> 2 steps (Action + Validation) or 1 log -> 1 step logic
+                # For now, let's distribute evenly or match indices
+                for i, step in enumerate(steps):
+                    # We typically have fewer logs than total steps because of the Action/Verify split
+                    # Heuristic: Step N corresponds roughly to log index N // 2
+                    log_idx = i // 2 
+                    if log_idx < len(relative_logs):
+                        step.timestamp_start = relative_logs[log_idx]
+                        if log_idx + 1 < len(relative_logs):
+                            step.timestamp_end = relative_logs[log_idx+1]
                         else:
-                            step.timestamp_end = at["relative"] + 5.0
-                        action_idx += 1
-                        break
-                    action_idx += 1
+                            step.timestamp_end = relative_logs[log_idx] + 10.0 # Default buffer
 
         return steps
 
