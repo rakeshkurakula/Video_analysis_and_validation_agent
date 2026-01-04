@@ -1,0 +1,651 @@
+{
+  "tag": "body",
+  "name": "FW 25",
+  "children": [
+    {
+      "tag": "header",
+      "name": "FW 25",
+      "children": [
+        {
+          "tag": "ul",
+          "name": "FW 25",
+          "children": [
+            {
+              "md": "131",
+              "tag": "a",
+              "role": "button",
+              "name": "FW 25"
+            },
+            {
+              "md": "132",
+              "tag": "a",
+              "role": "button",
+              "name": "NEW IN"
+            },
+            {
+              "md": "133",
+              "tag": "a",
+              "role": "button",
+              "name": "MEN"
+            },
+            {
+              "md": "161",
+              "tag": "a",
+              "role": "button",
+              "name": "WOMEN"
+            },
+            {
+              "md": "181",
+              "tag": "a",
+              "role": "button",
+              "name": "COLLECTIONS"
+            },
+            {
+              "md": "212",
+              "tag": "a",
+              "role": "button",
+              "name": "SALE"
+            },
+            {
+              "md": "213",
+              "tag": "a",
+              "role": "button",
+              "name": "FIT GUIDE"
+            }
+          ]
+        },
+        {
+          "tag": "div",
+          "name": "Enjoy GST Benefit Savings | Sign Up Now and Get 15% OFF* with Code: NEW15",
+          "children": [
+            {
+              "md": "214",
+              "tag": "a",
+              "name": "Enjoy GST Benefit Savings | Sign Up Now and Get 15% OFF* with Code: NEW15"
+            },
+            {
+              "md": "216",
+              "tag": "button",
+              "role": "button",
+              "name": "Close"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "md": "221",
+      "tag": "div",
+      "role": "main",
+      "name": "We are sorry. No matching products found!",
+      "children": [
+        {
+          "tag": "div",
+          "children": [
+            {
+              "md": "1605",
+              "tag": "a",
+              "role": "link",
+              "children": [
+                {
+                  "md": "1606",
+                  "tag": "img",
+                  "name": "Logo"
+                }
+              ]
+            },
+            {
+              "tag": "ul",
+              "children": [
+                {
+                  "md": "1607",
+                  "tag": "li",
+                  "children": [
+                    {
+                      "md": "1608",
+                      "tag": "a",
+                      "role": "link",
+                      "children": [
+                        {
+                          "md": "1609",
+                          "tag": "div",
+                          "children": [
+                            {
+                              "md": "1610",
+                              "tag": "img",
+                              "name": "Store Locator",
+                              "title": "Store Locator"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "md": "1611",
+                  "tag": "li",
+                  "children": [
+                    {
+                      "md": "1612",
+                      "tag": "a",
+                      "role": "link",
+                      "children": [
+                        {
+                          "md": "1613",
+                          "tag": "div",
+                          "children": [
+                            {
+                              "md": "1614",
+                              "tag": "img",
+                              "name": "Search",
+                              "title": "Search"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "md": "1615",
+                  "tag": "li",
+                  "children": [
+                    {
+                      "md": "1616",
+                      "tag": "a",
+                      "role": "link",
+                      "children": [
+                        {
+                          "md": "1617",
+                          "tag": "div",
+                          "children": [
+                            {
+                              "md": "1618",
+                              "tag": "img",
+                              "name": "Account",
+                              "title": "Account"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "md": "1619",
+                  "tag": "li",
+                  "children": [
+                    {
+                      "md": "1620",
+                      "tag": "a",
+                      "role": "link",
+                      "children": [
+                        {
+                          "md": "1621",
+                          "tag": "div",
+                          "children": [
+                            {
+                              "md": "1622",
+                              "tag": "img",
+                              "name": "Cart",
+                              "title": "Cart"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "children": [
+            {
+              "md": "1671",
+              "tag": "img"
+            },
+            {
+              "tag": "p",
+              "name": "We are sorry. No matching products found!"
+            },
+            {
+              "md": "1672",
+              "tag": "button",
+              "role": "button",
+              "name": "Continue Shopping"
+            }
+          ]
+        },
+        {
+          "md": "1677",
+          "tag": "div",
+          "children": [
+            {
+              "md": "1678",
+              "tag": "img",
+              "name": "Chat bot"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tag": "footer",
+      "children": [
+        {
+          "tag": "table",
+          "role": "marquee",
+          "children": [
+            {
+              "tag": "tr",
+              "children": [
+                {
+                  "tag": "td",
+                  "name": "Product Title"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "tag": "div",
+          "name": "MEN'S CLOTHING",
+          "children": [
+            {
+              "tag": "div",
+              "name": "MEN'S CLOTHING",
+              "children": [
+                {
+                  "md": "1679",
+                  "tag": "p",
+                  "name": "MEN'S CLOTHING",
+                  "children": [
+                    {
+                      "md": "1680",
+                      "tag": "a",
+                      "role": "link"
+                    }
+                  ]
+                },
+                {
+                  "tag": "ul",
+                  "name": "Jeans for Men",
+                  "children": [
+                    {
+                      "md": "1681",
+                      "tag": "a",
+                      "role": "link",
+                      "name": "Jeans for Men"
+                    },
+                    {
+                      "md": "1682",
+                      "tag": "a",
+                      "role": "link",
+                      "name": "Shirts for Men"
+                    },
+                    {
+                      "md": "1683",
+                      "tag": "a",
+                      "role": "link",
+                      "name": "Polo T Shirts for Men"
+                    },
+                    {
+                      "md": "1684",
+                      "tag": "a",
+                      "role": "link",
+                      "name": "T Shirts for Men"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "div",
+              "name": "WOMEN'S CLOTHING",
+              "children": [
+                {
+                  "md": "1685",
+                  "tag": "p",
+                  "name": "WOMEN'S CLOTHING",
+                  "children": [
+                    {
+                      "md": "1686",
+                      "tag": "a",
+                      "role": "link"
+                    }
+                  ]
+                },
+                {
+                  "tag": "ul",
+                  "name": "Jeans for Women",
+                  "children": [
+                    {
+                      "md": "1687",
+                      "tag": "a",
+                      "role": "link",
+                      "name": "Jeans for Women"
+                    },
+                    {
+                      "md": "1688",
+                      "tag": "a",
+                      "role": "link",
+                      "name": "Tops for Women"
+                    },
+                    {
+                      "md": "1689",
+                      "tag": "a",
+                      "role": "link",
+                      "name": "T Shirts for Women"
+                    },
+                    {
+                      "md": "1690",
+                      "tag": "a",
+                      "role": "link",
+                      "name": "Jackets, Sweatshirts and Sweaters for Women"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "div",
+              "name": "WRANGLER BRANDED CLOTHES - UPTO 50% OFF",
+              "children": [
+                {
+                  "md": "1691",
+                  "tag": "p",
+                  "name": "WRANGLER BRANDED CLOTHES - UPTO 50% OFF",
+                  "children": [
+                    {
+                      "md": "1692",
+                      "tag": "a",
+                      "role": "link"
+                    }
+                  ]
+                },
+                {
+                  "tag": "ul",
+                  "name": "Men's Jeans under RS.2000",
+                  "children": [
+                    {
+                      "md": "1693",
+                      "tag": "a",
+                      "role": "link",
+                      "name": "Men's Jeans under RS.2000"
+                    },
+                    {
+                      "md": "1694",
+                      "tag": "a",
+                      "role": "link",
+                      "name": "Men's Shirts under RS.1500"
+                    },
+                    {
+                      "md": "1695",
+                      "tag": "a",
+                      "role": "link",
+                      "name": "Men's T Shirts under RS.1000"
+                    },
+                    {
+                      "md": "1696",
+                      "tag": "a",
+                      "role": "link",
+                      "name": "Men's Polo T Shirts under RS.1000"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "div",
+              "name": "Wrangler FW '25 Collection",
+              "children": [
+                {
+                  "md": "1697",
+                  "tag": "a",
+                  "role": "link",
+                  "name": "Wrangler FW '25 Collection"
+                },
+                {
+                  "md": "1698",
+                  "tag": "a",
+                  "role": "link",
+                  "name": "COLLECTIONS"
+                },
+                {
+                  "md": "1699",
+                  "tag": "a",
+                  "role": "link",
+                  "name": "FIT GUIDE"
+                },
+                {
+                  "md": "1700",
+                  "tag": "a",
+                  "role": "link",
+                  "name": "LOOKBOOK"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "tag": "div",
+          "name": "ABOUT US",
+          "children": [
+            {
+              "tag": "div",
+              "name": "ABOUT US",
+              "children": [
+                {
+                  "md": "1701",
+                  "tag": "div",
+                  "name": "ABOUT US",
+                  "children": [
+                    {
+                      "md": "1702",
+                      "tag": "a",
+                      "role": "link"
+                    }
+                  ]
+                },
+                {
+                  "tag": "ul",
+                  "name": "About Us",
+                  "children": [
+                    {
+                      "md": "1703",
+                      "tag": "a",
+                      "role": "link",
+                      "name": "About Us"
+                    },
+                    {
+                      "md": "1704",
+                      "tag": "a",
+                      "name": "Store Locator"
+                    },
+                    {
+                      "md": "1705",
+                      "tag": "a",
+                      "role": "link",
+                      "name": "FAQs"
+                    },
+                    {
+                      "md": "1706",
+                      "tag": "a",
+                      "role": "link",
+                      "name": "Become a Franchise"
+                    },
+                    {
+                      "md": "1707",
+                      "tag": "a",
+                      "role": "link",
+                      "name": "Collections"
+                    },
+                    {
+                      "md": "1708",
+                      "tag": "a",
+                      "role": "link",
+                      "name": "Bulk Enquiry"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "div",
+              "name": "CUSTOMER SERVICE",
+              "children": [
+                {
+                  "md": "1709",
+                  "tag": "div",
+                  "name": "CUSTOMER SERVICE",
+                  "children": [
+                    {
+                      "md": "1710",
+                      "tag": "a"
+                    }
+                  ]
+                },
+                {
+                  "tag": "ul",
+                  "name": "Contact Us",
+                  "children": [
+                    {
+                      "md": "1711",
+                      "tag": "a",
+                      "role": "link",
+                      "name": "Contact Us"
+                    },
+                    {
+                      "md": "1712",
+                      "tag": "a",
+                      "role": "link",
+                      "name": "Privacy Policy"
+                    },
+                    {
+                      "md": "1713",
+                      "tag": "a",
+                      "role": "link",
+                      "name": "Return Policy"
+                    },
+                    {
+                      "md": "1714",
+                      "tag": "a",
+                      "role": "link",
+                      "name": "Shipping Policy"
+                    },
+                    {
+                      "md": "1715",
+                      "tag": "a",
+                      "role": "link",
+                      "name": "Warranty Policy"
+                    },
+                    {
+                      "md": "1716",
+                      "tag": "a",
+                      "role": "link",
+                      "name": "Terms & Conditions"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "tag": "div",
+              "name": "MY ACCOUNT",
+              "children": [
+                {
+                  "md": "1717",
+                  "tag": "div",
+                  "name": "MY ACCOUNT",
+                  "children": [
+                    {
+                      "md": "1718",
+                      "tag": "a",
+                      "role": "link"
+                    }
+                  ]
+                },
+                {
+                  "md": "1719",
+                  "tag": "a",
+                  "role": "link",
+                  "name": "Profile"
+                }
+              ]
+            },
+            {
+              "tag": "div",
+              "name": "FOLLOW US",
+              "children": [
+                {
+                  "tag": "p",
+                  "name": "FOLLOW US"
+                },
+                {
+                  "tag": "div",
+                  "children": [
+                    {
+                      "md": "1720",
+                      "tag": "a",
+                      "role": "link",
+                      "children": [
+                        {
+                          "md": "1721",
+                          "tag": "img",
+                          "name": "Instagram Link"
+                        }
+                      ]
+                    },
+                    {
+                      "md": "1722",
+                      "tag": "a",
+                      "role": "link",
+                      "children": [
+                        {
+                          "md": "1723",
+                          "tag": "img",
+                          "name": "Facebook Link"
+                        }
+                      ]
+                    },
+                    {
+                      "md": "1724",
+                      "tag": "a",
+                      "role": "link",
+                      "children": [
+                        {
+                          "md": "1725",
+                          "tag": "img",
+                          "name": "Youtube Link"
+                        }
+                      ]
+                    },
+                    {
+                      "md": "1726",
+                      "tag": "a",
+                      "role": "link",
+                      "children": [
+                        {
+                          "md": "1727",
+                          "tag": "img",
+                          "name": "Twiter Link"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tag": "noscript",
+      "name": "<img height=\"1\" width=\"1\" style=\"display:none\" src=\"https://www.facebook.com/tr?id=407190358458918&amp;ev=PageView&amp;noscript=1\">"
+    }
+  ]
+}
