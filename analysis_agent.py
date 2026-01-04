@@ -120,6 +120,52 @@ class PlanParser:
 
         return steps
 
+    def parse_from_gherkin(self, gherkin_path: Path) -> list[PlanStep]:
+        """
+        Extract steps and visual signals from Gherkin feature files.
+        Looks for # expected_visual_signals: ["signal1", "signal2"]
+        """
+        steps = []
+        if not gherkin_path.exists():
+            return steps
+
+        content = gherkin_path.read_text()
+        lines = content.splitlines()
+        
+        step_idx = 1
+        current_step = None
+        
+        for i, line in enumerate(lines):
+            stripped = line.strip()
+            # Match Gherkin keywords
+            if any(stripped.startswith(kw) for kw in ["Given ", "When ", "Then ", "And ", "But "]):
+                description = re.sub(r"^(Given|When|Then|And|But)\s+", "", stripped)
+                
+                # Create new step
+                current_step = PlanStep(
+                    index=step_idx,
+                    action=self._infer_action(description),
+                    target=self._infer_target(description),
+                    description=description,
+                    expected_visual_signal="",
+                )
+                steps.append(current_step)
+                step_idx += 1
+            
+            # Match expected signals in comments
+            elif current_step and "# expected_visual_signals:" in stripped:
+                try:
+                    # Extract list from comment
+                    signal_match = re.search(r"#\s*expected_visual_signals:\s*(\[.*?\])", stripped)
+                    if signal_match:
+                        signals = json.loads(signal_match.group(1).replace("'", '"'))
+                        if isinstance(signals, list):
+                            current_step.expected_visual_signal = ", ".join(signals)
+                except Exception:
+                    pass
+
+        return steps
+
     def _parse_plan_text(self, plan_text: str) -> list[PlanStep]:
         """Parse numbered plan text into PlanStep objects."""
         steps = []
@@ -296,8 +342,10 @@ class AnalysisAgent:
             "chat_messages": None,
             "junit_xml": None,
             "log_files": [],
+            "gherkin": None,
         }
 
+        # First, try structured directories (opt/proofs, opt/log_files, etc.)
         # Proofs directory
         proofs_dir = self.base_path / "opt" / "proofs" / self.scenario / self.run_id
         if proofs_dir.exists():
@@ -324,6 +372,43 @@ class AnalysisAgent:
         output_dir = self.base_path / "opt" / "output" / self.run_id
         if output_dir.exists():
             xml_files = list(output_dir.glob("*.xml"))
+            if xml_files:
+                artifacts["junit_xml"] = xml_files[0]
+
+        # Search for Gherkin file
+        gherkin_search_paths = [
+            self.base_path / "gherkin_files" / f"{self.scenario}.feature",
+            self.base_path / "opt" / "input" / f"{self.scenario}.feature",
+        ]
+        for path in gherkin_search_paths:
+            if path.exists():
+                artifacts["gherkin"] = path
+                break
+
+        # Fallback: Flat directory structure (e.g., supportingLogs)
+        # This supports directories where all artifacts are in a single folder
+        if not artifacts["video"]:
+            videos = list(self.base_path.glob("*.webm")) + list(self.base_path.glob("*.mp4"))
+            if videos:
+                artifacts["video"] = videos[0]
+        
+        if not artifacts["screenshots"]:
+            screenshots = list(self.base_path.glob("*.png"))
+            artifacts["screenshots"] = screenshots
+        
+        if not artifacts["chat_messages"]:
+            # Look for agent_inner_logs.json, chat_manager logs, or any logs
+            agent_logs = list(self.base_path.glob("agent_inner_logs.json"))
+            chat_logs = list(self.base_path.glob("*chat_manager*.json"))
+            if chat_logs:
+                artifacts["chat_messages"] = chat_logs[-1]
+            elif agent_logs:
+                artifacts["chat_messages"] = agent_logs[0]
+            
+            artifacts["log_files"] = list(self.base_path.glob("*.json"))
+        
+        if not artifacts["junit_xml"]:
+            xml_files = list(self.base_path.glob("test_result.xml")) + list(self.base_path.glob("*.xml"))
             if xml_files:
                 artifacts["junit_xml"] = xml_files[0]
 
@@ -369,8 +454,12 @@ class AnalysisAgent:
         """Extract plan steps from artifacts."""
         steps = []
 
-        # Try chat messages first
-        if artifacts.get("chat_messages"):
+        # Try Gherkin first (highest priority if available)
+        if artifacts.get("gherkin"):
+            steps = self.plan_parser.parse_from_gherkin(artifacts["gherkin"])
+
+        # Try chat messages second
+        if not steps and artifacts.get("chat_messages"):
             steps = self.plan_parser.parse_from_chat_messages(artifacts["chat_messages"])
 
         # Fallback to JUnit XML
@@ -452,26 +541,117 @@ class AnalysisAgent:
 
         return matches
 
-    def check_log_claims(self, step: PlanStep, artifacts: dict) -> bool:
-        """Check if logs claim this step was executed."""
-        # Search through log files for claims about this step
-        for log_path in artifacts.get("log_files", []):
-            try:
-                with open(log_path) as f:
-                    content = f.read().lower()
-                    # Check for action keywords
-                    action_keywords = {
-                        "navigate": ["navigated", "opened", "loaded"],
-                        "click": ["clicked", "pressed", "tapped"],
-                        "type": ["typed", "entered", "input"],
-                        "verify": ["verified", "confirmed", "asserted"],
-                    }
-                    keywords = action_keywords.get(step.action.lower(), [step.action.lower()])
-                    if any(kw in content for kw in keywords):
-                        return True
-            except Exception:
-                pass
-        return False
+    def check_log_claims(self, step: PlanStep, artifacts: dict) -> tuple[bool, bool]:
+        """Check if logs claim this step was executed.
+        
+        Returns:
+            Tuple of (has_claim, is_confirmed_success) where:
+            - has_claim: True if logs mention this step being executed
+            - is_confirmed_success: True if logs explicitly confirm success
+        """
+        chat_log = artifacts.get("chat_messages")
+        if not chat_log:
+            return False, False
+        
+        try:
+            with open(chat_log) as f:
+                data = json.load(f)
+            
+            # Extract keywords from step description for matching
+            step_keywords = []
+            desc_lower = step.description.lower()
+            # Key action words
+            for word in ["navigate", "click", "search", "enter", "type", "filter", 
+                        "validate", "verify", "assert", "select", "locate",
+                        "homepage", "load", "url", "open"]:
+                if word in desc_lower:
+                    step_keywords.append(word)
+            # Key target words (URL, element names, etc)
+            if step.target:
+                step_keywords.append(step.target.lower())
+            # Extract quoted values from description
+            import re
+            quoted = re.findall(r"'([^']+)'", step.description)
+            step_keywords.extend([q.lower() for q in quoted])
+            # Extract URL domains (e.g., wrangler.in from https://wrangler.in)
+            urls = re.findall(r'https?://([^\s/]+)', step.description)
+            step_keywords.extend([u.lower() for u in urls])
+            
+            # Handle agent_inner_logs.json format (planner_agent list)
+            if "planner_agent" in data:
+                messages = data["planner_agent"]
+            else:
+                # Flatten all message lists
+                messages = []
+                for key, msgs in data.items():
+                    messages.extend(msgs)
+            
+            # Determine minimum matches required
+            # Require at least 1 match, or 50% of keywords if more than 2
+            min_matches = max(1, len(step_keywords) // 2) if step_keywords else 1
+            
+            for msg in messages:
+                content = msg.get("content", "")
+                if isinstance(content, str):
+                    content_lower = content.lower()
+                    # Look for execution mention
+                    if "previous_step:" in content_lower:
+                        # Check if enough keywords match this content
+                        matches = sum(1 for kw in step_keywords if kw in content_lower)
+                        if matches >= min_matches:
+                            is_success = "completed_successfully" in content_lower
+                            return True, is_success
+        except Exception:
+            pass
+        return False, False
+    
+    def detect_termination_step(self, artifacts: dict) -> int | None:
+        """Detect which plan step caused test termination.
+        
+        Browser responses typically cover 2 plan steps (action + validation).
+        We need to map browser response count to actual plan step numbers.
+        """
+        chat_log = artifacts.get("chat_messages")
+        if not chat_log:
+            return None
+        
+        try:
+            with open(chat_log) as f:
+                data = json.load(f)
+            
+            # Handle agent_inner_logs.json format (planner_agent list)
+            if "planner_agent" in data:
+                messages = data["planner_agent"]
+                # Count completed step cycles (user msg from browser + planner response)
+                # Each browser response contains "previous_step:" showing prior work
+                browser_responses = 0
+                for msg in messages:
+                    content = msg.get("content", "")
+                    if isinstance(content, str) and "previous_step:" in content.lower():
+                        browser_responses += 1
+                    if isinstance(content, dict) and content.get("terminate") == "yes":
+                        # Map browser responses to plan steps
+                        # Typically: 1 response = 2 plan steps (action + validation)
+                        # But the last response before termination covers only 1 step
+                        # Pattern: 1×2=2, 2×2=4, 3×2=6, 4×2=8... but last is partial
+                        # If terminated at response N, steps 1 to (N-1)*2 + 1 were attempted
+                        # Skipped steps start from (N-1)*2 + 2
+                        plan_step_at_failure = (browser_responses - 1) * 2 + 1
+                        return plan_step_at_failure
+            else:
+                # Handle chat_manager format
+                browser_responses = 0
+                for key, messages in data.items():
+                    for msg in messages:
+                        content = msg.get("content", "")
+                        if isinstance(content, str) and "previous_step:" in content.lower():
+                            browser_responses += 1
+                        if isinstance(content, dict) and content.get("terminate") == "yes":
+                            plan_step_at_failure = (browser_responses - 1) * 2 + 1
+                            return plan_step_at_failure
+        except Exception:
+            pass
+        return None
 
     def evaluate_steps(
         self, steps: list[PlanStep], evidence: EvidenceStore, artifacts: dict
@@ -479,11 +659,34 @@ class AnalysisAgent:
         """Evaluate each step and classify deviations."""
         results = []
         previous_result = None
+        
+        # Detect at which step the test terminated
+        termination_step = self.detect_termination_step(artifacts)
+        test_terminated = False
 
         for step in steps:
+            # If we've passed the termination point, all remaining steps are skipped
+            if termination_step is not None and step.index > termination_step:
+                test_terminated = True
+            
+            if test_terminated:
+                # Mark as skipped due to early termination
+                result = StepResult(
+                    index=step.index,
+                    description=step.description,
+                    status=StepStatus.DEVIATION_SKIPPED,
+                    confidence=0.95,
+                    notes="Test terminated early; step was never executed.",
+                    evidence_paths=[],
+                    timestamp_window="",
+                )
+                results.append(result)
+                previous_result = result
+                continue
+                
             # Find matching evidence
             visual_matches = self.find_visual_matches(step, evidence)
-            log_has_claim = self.check_log_claims(step, artifacts)
+            log_has_claim, log_confirmed_success = self.check_log_claims(step, artifacts)
 
             # Classify using the deviation classifier
             classification = self.classifier.classify(
@@ -492,6 +695,7 @@ class AnalysisAgent:
                 previous_result=previous_result,
                 visual_matches=visual_matches,
                 log_has_claim=log_has_claim,
+                log_confirmed_success=log_confirmed_success,
             )
 
             # Build timestamp window string

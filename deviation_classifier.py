@@ -75,6 +75,7 @@ class DeviationClassifier:
         previous_result: Any = None,
         visual_matches: list | None = None,
         log_has_claim: bool = False,
+        log_confirmed_success: bool = False,
     ) -> ClassificationResult:
         """
         Classify a step based on available evidence.
@@ -85,6 +86,7 @@ class DeviationClassifier:
             previous_result: Result of the previous step (for cascade detection)
             visual_matches: Evidence items that match expected signals
             log_has_claim: Whether logs claim this step was executed
+            log_confirmed_success: Whether logs explicitly confirm SUCCESS
 
         Returns:
             ClassificationResult with status, confidence, and evidence
@@ -128,7 +130,18 @@ class DeviationClassifier:
             )
 
         # ─────────────────────────────────────────────────────────────────────
-        # 3. Hallucination detection (HALoGEN principle)
+        # 3. Log confirms SUCCESS without visual evidence → Observed (trust browser)
+        # ─────────────────────────────────────────────────────────────────────
+        if log_confirmed_success:
+            return ClassificationResult(
+                status=StepStatus.OBSERVED,
+                confidence=0.75,  # Slightly lower confidence than visual
+                notes=["Browser logs confirm successful execution (no visual verification available)."],
+            )
+
+        # ─────────────────────────────────────────────────────────────────────
+        # 4. Hallucination detection (HALoGEN principle)
+        #    Log claims execution but no confirmation of success
         # ─────────────────────────────────────────────────────────────────────
         if log_has_claim and not visual_matches:
             return ClassificationResult(
