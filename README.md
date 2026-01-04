@@ -126,6 +126,15 @@ uv sync
 
 ---
 
+## 1. Activate virtual environment
+source .venv/bin/activate
+## 2. Run Hercules
+testzeus-hercules \
+  --input-file gherkin_files/wrangler_product_search.feature \
+  --output-path opt \
+  --llm-config agents_llm_config.json \
+  --save-recording-option always
+
 ## 💻 Usage
 
 ### Basic Usage (Auto-detects Latest Run)
