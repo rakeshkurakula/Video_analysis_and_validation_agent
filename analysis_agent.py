@@ -22,6 +22,13 @@ from typing import Optional
 
 from deviation_classifier import DeviationClassifier, StepStatus, ClassificationResult
 
+# Optional: LLM-based vision analysis (superior to OCR)
+try:
+    from vision_llm_analyzer import VisionLLMAnalyzer
+    VISION_LLM_AVAILABLE = True
+except ImportError:
+    VISION_LLM_AVAILABLE = False
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Data Models (Fara-7B inspired structured schema)
@@ -323,16 +330,28 @@ class AnalysisAgent:
         base_path: Path,
         video_interval: float = 2.0,
         no_video_sampling: bool = False,
+        use_vision_llm: bool = False,  # Use LLM for vision analysis instead of OCR
+        vision_provider: str = "groq",  # LLM provider for vision analysis
+        gherkin_path: Path | None = None,  # Explicit path to Gherkin file
     ):
         self.scenario = scenario
         self.run_id = run_id
         self.base_path = base_path
         self.video_interval = video_interval
         self.no_video_sampling = no_video_sampling
+        self.use_vision_llm = use_vision_llm and VISION_LLM_AVAILABLE
+        self.gherkin_path = gherkin_path
 
         self.plan_parser = PlanParser()
         self.video_analyzer = VideoAnalyzer(video_interval)
         self.classifier = DeviationClassifier()
+        
+        # Initialize Vision LLM Analyzer if enabled
+        if self.use_vision_llm:
+            self.vision_llm = VisionLLMAnalyzer(provider=vision_provider)
+            print(f"Vision LLM enabled using {vision_provider}")
+        else:
+            self.vision_llm = None
 
     def find_artifacts(self) -> dict:
         """Locate all artifacts for the run."""
@@ -342,7 +361,7 @@ class AnalysisAgent:
             "chat_messages": None,
             "junit_xml": None,
             "log_files": [],
-            "gherkin": None,
+            "gherkin": self.gherkin_path,
         }
 
         # First, try structured directories (opt/proofs, opt/log_files, etc.)
@@ -376,14 +395,15 @@ class AnalysisAgent:
                 artifacts["junit_xml"] = xml_files[0]
 
         # Search for Gherkin file
-        gherkin_search_paths = [
-            self.base_path / "gherkin_files" / f"{self.scenario}.feature",
-            self.base_path / "opt" / "input" / f"{self.scenario}.feature",
-        ]
-        for path in gherkin_search_paths:
-            if path.exists():
-                artifacts["gherkin"] = path
-                break
+        if not artifacts["gherkin"]:
+            gherkin_search_paths = [
+                self.base_path / "gherkin_files" / f"{self.scenario}.feature",
+                self.base_path / "opt" / "input" / f"{self.scenario}.feature",
+            ]
+            for path in gherkin_search_paths:
+                if path.exists():
+                    artifacts["gherkin"] = path
+                    break
 
         # Fallback: Flat directory structure (e.g., supportingLogs)
         # This supports directories where all artifacts are in a single folder
@@ -525,6 +545,39 @@ class AnalysisAgent:
     ) -> list[EvidenceItem]:
         """Find evidence items that match the step's expected visual signal."""
         matches = []
+        
+        # Use Vision LLM for frame analysis if enabled
+        if self.use_vision_llm and self.vision_llm and evidence.video_frames:
+            # Sample frames to analyze (every 5th frame to reduce API calls)
+            sampled_frames = evidence.video_frames[::5][:3]  # Max 3 frames
+            
+            expected_signals = []
+            if step.expected_visual_signal:
+                expected_signals.append(step.expected_visual_signal)
+            if step.target:
+                expected_signals.append(step.target)
+            
+            for frame in sampled_frames:
+                try:
+                    result = self.vision_llm.analyze_frame(
+                        image_path=frame.path,
+                        expected_signals=expected_signals,
+                        step_description=step.description,
+                        timestamp=frame.timestamp,
+                    )
+                    
+                    # Check if LLM found relevant content
+                    if result.confidence > 0.5:
+                        # Update frame text with LLM analysis
+                        frame.text = " ".join(result.key_text + result.visible_elements)
+                        matches.append(frame)
+                except Exception as e:
+                    print(f"Vision LLM error: {e}")
+                    continue
+            
+            return matches
+        
+        # Fallback to OCR-based matching
         signal = step.expected_visual_signal.lower() if step.expected_visual_signal else ""
         target = step.target.lower() if step.target else ""
         action = step.action.lower()
@@ -574,7 +627,7 @@ class AnalysisAgent:
             quoted = re.findall(r"'([^']+)'", step.description)
             step_keywords.extend([q.lower() for q in quoted])
             # Extract URL domains (e.g., wrangler.in from https://wrangler.in)
-            urls = re.findall(r'https?://([^\s/]+)', step.description)
+            urls = re.findall(r'https?://([^\s/.,]+(?:\.[^\s/.,]+)*)', step.description)
             step_keywords.extend([u.lower() for u in urls])
             
             # Handle agent_inner_logs.json format (planner_agent list)
@@ -937,6 +990,12 @@ def main():
                         help="Interval for video frame sampling (seconds)")
     parser.add_argument("--no-video-sampling", action="store_true",
                         help="Skip video frame extraction")
+    parser.add_argument("--use-vision-llm", action="store_true",
+                        help="Use LLM for vision analysis instead of OCR (more accurate)")
+    parser.add_argument("--vision-provider", type=str, default="groq",
+                        choices=["openai", "google", "anthropic", "groq"],
+                        help="LLM provider for vision analysis")
+    parser.add_argument("--gherkin", type=str, help="Explicit path to Gherkin feature file")
 
     args = parser.parse_args()
 
@@ -964,6 +1023,9 @@ def main():
         base_path=base_path,
         video_interval=args.video_interval,
         no_video_sampling=args.no_video_sampling,
+        use_vision_llm=args.use_vision_llm,
+        vision_provider=args.vision_provider,
+        gherkin_path=Path(args.gherkin) if args.gherkin else None,
     )
 
     output_path = Path(args.output) if args.output else None
