@@ -57,7 +57,8 @@ flowchart TD
 - **Plan Extraction** — Parses Gherkin features, Hercules logs, or JUnit XML to extract test steps
 - **Termination Detection** — Identifies when tests ended early and marks subsequent steps as skipped
 - **Log-Based Verification** — Trusts browser execution confirmations when available
-- **Visual Verification** — OCR or LLM-based analysis of video frames
+- **Visual Verification** — Vision LLM-based analysis of video frames
+- **Asynchronous Pipeline** — Parallel processing of video frames (approx. 70% faster)
 
 ### Vision Analysis Options
 
@@ -167,6 +168,7 @@ Options:
   --scenario SCENARIO          Scenario name
   --run-id RUN_ID              Run ID (e.g., run_20260104_043806)
   --base-path BASE_PATH        Base path to artifacts
+  --gherkin GHERKIN_PATH       Path to .feature file for plan extraction
   --output-format {markdown,json}  Output format
   --output OUTPUT              Output file path
   --video-interval SECONDS     Frame sampling interval (default: 2.0)

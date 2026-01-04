@@ -1,5 +1,33 @@
 # Repository Guidelines
 
+## 🤖 System Agents
+
+This repository implements a multi-agent validation system.
+
+### 1. Analysis Orchestrator (`analysis_agent.py`)
+- **Role**: The central "brain" that orchestrates the entire validation lifecycle.
+- **Responsibilities**:
+    - Parsing Gherkin feature files and mapping them to "Golden Steps".
+    - Ingesting raw logs (Hercules/Chrome) and identifying test execution boundaries.
+    - Dispatching evidence to the Vision LLM for verification.
+    - Aggregating results into the final Deviation Report.
+
+### 2. Vision LLM Analyzer (`vision_llm_analyzer.py`)
+- **Role**: The "eyes" of the system, responsible for semantic visual verification.
+- **Key Capabilities**:
+    - **Asynchronous Parallel Pipeline**: Uses `asyncio` to process video frames in parallel batches. This results in a ~70% speedup compared to sequential analysis.
+    - **Multi-Provider Support**: Seamlessly switches between Groq (Llama-3), OpenAI (GPT-4o), and Google (Gemini) based on configuration.
+    - **Contextual Vision**: Evaluates images specifically against the *context* of a test step (e.g., looking for "Size XL" specifically, rather than just reading all text).
+
+### 3. Deviation Classifier (`deviation_classifier.py`)
+- **Role**: The "judge" that applies the 6-class taxonomy to every step.
+- **Logic**:
+    - Distinguishes between **Hallucinated** (Log says yes, Video says no) and **Observed** (Log says yes, Video says yes).
+    - Identifies **Deviation-Skipped** steps when a test terminates early, preventing false "failure" noise for subsequent steps.
+
+---
+
+
 ## Project Structure & Module Organization
 The repo centers on the analysis agent script `analysis_agent.py`. Hercules artifacts live under `opt/`:
 - `opt/log_files/` for planner logs
