@@ -126,6 +126,9 @@ uv sync
 
 ---
 
+## run herculus
+
+
 ## 1. Activate virtual environment
 source .venv/bin/activate
 ## 2. Run Hercules
@@ -156,7 +159,6 @@ uv run analysis_agent.py \
 uv run analysis_agent.py \
   --scenario "wrangler_test" \
   --run-id "supportingLogs" \
-  --base-path "../supportingLogs"
 ```
 
 ### With Vision LLM (Recommended for Accuracy)
@@ -164,7 +166,6 @@ uv run analysis_agent.py \
 uv run analysis_agent.py \
   --scenario "wrangler_test" \
   --run-id "supportingLogs" \
-  --base-path "../supportingLogs" \
   --use-vision-llm \
   --vision-provider groq
 ```
