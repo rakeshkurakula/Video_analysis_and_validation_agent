@@ -85,11 +85,9 @@ Based on research from HALoGEN, BrowseComp, and HLE benchmarks:
 
 ```
 Video_analysis_and_validation_agent/
-├── analysis_agent.py          # Main orchestrator
+├── analysis_agent.py          # Main orchestrator (includes PlanParser, VideoAnalyzer)
 ├── deviation_classifier.py    # 6-class taxonomy classification
-├── vision_llm_analyzer.py     # LLM-based vision analysis (NEW)
-├── plan_parser.py             # Step extraction from logs
-├── video_analyzer.py          # Video frame extraction + OCR
+├── vision_llm_analyzer.py     # LLM-based vision analysis
 ├── agents_llm_config.json     # API configuration for LLM providers
 ├── gherkin_files/             # Gherkin feature files
 │   └── wrangler_product_search.feature
@@ -287,30 +285,30 @@ Reports are written to `opt/output/deviation_report_<run_id>.md` by default, or 
 
 ## 🏗️ Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                      analysis_agent.py                          │
-│                     (Main Orchestrator)                         │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐ │
-│  │  PlanParser  │  │VideoAnalyzer │  │ VisionLLMAnalyzer    │ │
-│  │              │  │              │  │ (Optional)           │ │
-│  │ • Gherkin    │  │ • ffmpeg     │  │ • Groq/OpenAI/etc    │ │
-│  │ • Logs       │  │ • Tesseract  │  │ • Base64 images      │ │
-│  │ • JUnit XML  │  │ • OCR        │  │ • Semantic analysis  │ │
-│  └──────────────┘  └──────────────┘  └──────────────────────┘ │
-│                                                                 │
-│  ┌─────────────────────────────────────────────────────────┐   │
-│  │              DeviationClassifier                         │   │
-│  │                                                          │   │
-│  │  • 6-class taxonomy (Observed, Skipped, Hallucinated...) │   │
-│  │  • Confidence scoring                                    │   │
-│  │  • Cascade failure detection                             │   │
-│  │  • Log-based success verification                        │   │
-│  └─────────────────────────────────────────────────────────┘   │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    A[Hercules Logs] --> B[Plan Parser]
+    B --> C[StructuredStep Schema]
+    
+    D[Video Frames] --> E[Frame Enhancer]
+    E --> F[OCR Pipeline]
+    F --> G[UI Element Detector]
+    
+    H[Screenshots] --> F
+    
+    C --> I[Deviation Classifier]
+    G --> I
+    F --> I
+    
+    I --> J[Step Results]
+    J --> K[Report Generator]
+    
+    K --> L[Markdown Report]
+    K --> M[JSON Report]
+    
+    N[Gold Labels] --> O[Accuracy Evaluator]
+    J --> O
+    O --> P[Metrics Dashboard]
 ```
 
 ---

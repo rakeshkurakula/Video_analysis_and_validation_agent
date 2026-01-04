@@ -29,7 +29,7 @@ Minimum parse targets:
 2. Inspect the video(s) to determine whether each claimed action is visibly executed.
 3. Cross-check with the final test output to validate consistency and outcome alignment.
 
-## Atomic Pipeline for Experimentation
+## Pipeline for Experimentation
 1. Discover artifacts: enumerate files, validate presence, and record missing items. Tradeoff: strict validation blocks runs vs. permissive mode that tolerates missing video or logs.
 2. Parse `test_result.xml`: extract test metadata, failure message, and embedded plan/next_step properties. Tradeoff: XML-only parsing is fast but may miss richer context in JSON logs.
 3. Parse `agent_inner_logs.json`: extract all `plan` strings, split numbered lines into atomic steps, preserve order. Tradeoff: simple split is deterministic but fails on unnumbered or nested steps.

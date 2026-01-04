@@ -20,6 +20,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
+import asyncio
 from deviation_classifier import DeviationClassifier, StepStatus, ClassificationResult
 
 # Optional: LLM-based vision analysis (superior to OCR)
@@ -540,7 +541,7 @@ class AnalysisAgent:
 
         return steps
 
-    def find_visual_matches(
+    async def find_visual_matches(
         self, step: PlanStep, evidence: EvidenceStore
     ) -> list[EvidenceItem]:
         """Find evidence items that match the step's expected visual signal."""
@@ -549,6 +550,7 @@ class AnalysisAgent:
         # Use Vision LLM for frame analysis if enabled
         if self.use_vision_llm and self.vision_llm and evidence.video_frames:
             # Sample frames to analyze (every 5th frame to reduce API calls)
+            # Use the new async batch analyzer
             sampled_frames = evidence.video_frames[::5][:3]  # Max 3 frames
             
             expected_signals = []
@@ -557,23 +559,23 @@ class AnalysisAgent:
             if step.target:
                 expected_signals.append(step.target)
             
-            for frame in sampled_frames:
-                try:
-                    result = self.vision_llm.analyze_frame(
-                        image_path=frame.path,
-                        expected_signals=expected_signals,
-                        step_description=step.description,
-                        timestamp=frame.timestamp,
-                    )
-                    
-                    # Check if LLM found relevant content
+            frame_data = [(f.path, f.timestamp) for f in sampled_frames]
+            
+            try:
+                results = await self.vision_llm.analyze_frames_batch(
+                    frames=frame_data,
+                    expected_signals=expected_signals,
+                    step_description=step.description,
+                    sample_rate=1, # Already sampled
+                )
+                
+                for i, result in enumerate(results):
                     if result.confidence > 0.5:
-                        # Update frame text with LLM analysis
+                        frame = sampled_frames[i]
                         frame.text = " ".join(result.key_text + result.visible_elements)
                         matches.append(frame)
-                except Exception as e:
-                    print(f"Vision LLM error: {e}")
-                    continue
+            except Exception as e:
+                print(f"Vision LLM error: {e}")
             
             return matches
         
@@ -706,7 +708,7 @@ class AnalysisAgent:
             pass
         return None
 
-    def evaluate_steps(
+    async def evaluate_steps(
         self, steps: list[PlanStep], evidence: EvidenceStore, artifacts: dict
     ) -> list[StepResult]:
         """Evaluate each step and classify deviations."""
@@ -738,7 +740,7 @@ class AnalysisAgent:
                 continue
                 
             # Find matching evidence
-            visual_matches = self.find_visual_matches(step, evidence)
+            visual_matches = await self.find_visual_matches(step, evidence)
             log_has_claim, log_confirmed_success = self.check_log_claims(step, artifacts)
 
             # Classify using the deviation classifier
@@ -894,7 +896,7 @@ class AnalysisAgent:
 
         print(f"Report written to {output_path}")
 
-    def run(self, output_format: str = "markdown", output_path: Optional[Path] = None) -> None:
+    async def run(self, output_format: str = "markdown", output_path: Optional[Path] = None) -> None:
         """Execute the full analysis pipeline."""
         print(f"Analyzing run: {self.run_id} for scenario: {self.scenario}")
 
@@ -922,7 +924,7 @@ class AnalysisAgent:
         steps = self.align_evidence_to_steps(steps, evidence, artifacts)
 
         # 5. Evaluate each step
-        results = self.evaluate_steps(steps, evidence, artifacts)
+        results = await self.evaluate_steps(steps, evidence, artifacts)
 
         # 6. Extract final output
         final_output = self.extract_final_output(artifacts)
@@ -1029,7 +1031,7 @@ def main():
     )
 
     output_path = Path(args.output) if args.output else None
-    agent.run(output_format=args.output_format, output_path=output_path)
+    asyncio.run(agent.run(output_format=args.output_format, output_path=output_path))
 
 
 if __name__ == "__main__":

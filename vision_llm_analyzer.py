@@ -116,7 +116,7 @@ class VisionLLMAnalyzer:
         with open(image_path, "rb") as f:
             return base64.standard_b64encode(f.read()).decode("utf-8")
     
-    def analyze_frame(
+    async def analyze_frame(
         self,
         image_path: Path,
         expected_signals: list[str] | None = None,
@@ -150,13 +150,13 @@ class VisionLLMAnalyzer:
         
         # Call the appropriate API
         if self.provider == "openai":
-            result = self._call_openai(image_b64, prompt)
+            result = await self._call_openai(image_b64, prompt)
         elif self.provider == "google":
-            result = self._call_google(image_b64, prompt)
+            result = await self._call_google(image_b64, prompt)
         elif self.provider == "anthropic":
-            result = self._call_anthropic(image_b64, prompt)
+            result = await self._call_anthropic(image_b64, prompt)
         elif self.provider == "groq":
-            result = self._call_groq(image_b64, prompt)
+            result = await self._call_groq(image_b64, prompt)
         else:
             result = {"error": f"Unknown provider: {self.provider}"}
         
@@ -192,13 +192,13 @@ Please identify and return the following in JSON format:
         
         return prompt
     
-    def _call_openai(self, image_b64: str, prompt: str) -> dict:
+    async def _call_openai(self, image_b64: str, prompt: str) -> dict:
         """Call OpenAI's vision API."""
         try:
             import openai
             
-            client = openai.OpenAI(api_key=self.api_key)
-            response = client.chat.completions.create(
+            client = openai.AsyncOpenAI(api_key=self.api_key)
+            response = await client.chat.completions.create(
                 model=self.model,
                 messages=[
                     {
@@ -221,7 +221,7 @@ Please identify and return the following in JSON format:
         except Exception as e:
             return {"error": str(e)}
     
-    def _call_google(self, image_b64: str, prompt: str) -> dict:
+    async def _call_google(self, image_b64: str, prompt: str) -> dict:
         """Call Google's Gemini Vision API."""
         try:
             import google.generativeai as genai
@@ -236,18 +236,18 @@ Please identify and return the following in JSON format:
             image_data = base64.b64decode(image_b64)
             image = Image.open(io.BytesIO(image_data))
             
-            response = model.generate_content([prompt, image])
+            response = await model.generate_content_async([prompt, image])
             return {"content": response.text}
         except Exception as e:
             return {"error": str(e)}
     
-    def _call_anthropic(self, image_b64: str, prompt: str) -> dict:
+    async def _call_anthropic(self, image_b64: str, prompt: str) -> dict:
         """Call Anthropic's Claude Vision API."""
         try:
             import anthropic
             
-            client = anthropic.Anthropic(api_key=self.api_key)
-            response = client.messages.create(
+            client = anthropic.AsyncAnthropic(api_key=self.api_key)
+            response = await client.messages.create(
                 model=self.model,
                 max_tokens=1000,
                 messages=[
@@ -274,7 +274,7 @@ Please identify and return the following in JSON format:
         except Exception as e:
             return {"error": str(e)}
     
-    def _call_groq(self, image_b64: str, prompt: str) -> dict:
+    async def _call_groq(self, image_b64: str, prompt: str) -> dict:
         """Call Groq's vision API (OpenAI-compatible endpoint)."""
         try:
             import openai
@@ -284,12 +284,12 @@ Please identify and return the following in JSON format:
             if not base_url.endswith("/openai/v1"):
                 base_url = base_url.rstrip("/") + "/openai/v1"
             
-            client = openai.OpenAI(
+            client = openai.AsyncOpenAI(
                 api_key=self.api_key,
                 base_url=base_url,
             )
             
-            response = client.chat.completions.create(
+            response = await client.chat.completions.create(
                 model=self.model,
                 messages=[
                     {
@@ -353,7 +353,7 @@ Please identify and return the following in JSON format:
         
         return result
     
-    def analyze_frames_batch(
+    async def analyze_frames_batch(
         self,
         frames: list[tuple[Path, float]],  # (path, timestamp) pairs
         expected_signals: list[str] | None = None,
@@ -361,32 +361,23 @@ Please identify and return the following in JSON format:
         sample_rate: int = 3,  # Analyze every Nth frame
     ) -> list[VisionAnalysisResult]:
         """
-        Analyze multiple frames, sampling to reduce API calls.
-        
-        Args:
-            frames: List of (frame_path, timestamp) tuples
-            expected_signals: Visual signals to look for
-            step_description: Description of the step
-            sample_rate: Analyze every Nth frame (default: 3)
-            
-        Returns:
-            List of analysis results
+        Analyze multiple frames in parallel using asyncio.
         """
-        results = []
+        import asyncio
         sampled_frames = frames[::sample_rate]
         
+        tasks = []
         for path, timestamp in sampled_frames:
-            result = self.analyze_frame(
+            tasks.append(self.analyze_frame(
                 image_path=path,
                 expected_signals=expected_signals,
                 step_description=step_description,
                 timestamp=timestamp,
-            )
-            results.append(result)
+            ))
         
-        return results
+        return await asyncio.gather(*tasks)
     
-    def verify_step(
+    async def verify_step(
         self,
         frames: list[tuple[Path, float]],
         step_description: str,
@@ -394,16 +385,8 @@ Please identify and return the following in JSON format:
     ) -> dict:
         """
         Verify if a step was executed correctly based on video frames.
-        
-        Returns:
-            Dict with verification result:
-            - verified: bool
-            - confidence: float
-            - signals_found: list
-            - signals_missing: list
-            - evidence: list of frame analysis results
         """
-        results = self.analyze_frames_batch(
+        results = await self.analyze_frames_batch(
             frames=frames,
             expected_signals=expected_signals,
             step_description=step_description,
